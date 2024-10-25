@@ -1,14 +1,14 @@
-#include <iostream> 
+#include <iostream>
 using namespace std;
 
-// thông tin ngày tháng năm
+// Thông tin ngày tháng năm
 struct Ngay {
     int ngay, thang, nam;
 };
 
-// Khai báo SV
+// Khai báo sinh viên
 struct SinhVien {
-    char maSV[8];      // Mã sv (7 ký tự và 1 ký tự null)
+    char maSV[8];      // Mã sinh viên (7 ký tự và 1 ký tự null)
     char hoTen[50];   
     int gioiTinh;       // Giới tính (0: Nữ, 1: Nam)
     Ngay ngaySinh;      
@@ -20,29 +20,28 @@ struct SinhVien {
 // Khai báo Node và danh sách liên kết
 struct Node {
     SinhVien data;  
-    Node* next;     //trỏ đến node kế tiếp
+    Node* next;     // Trỏ đến node kế tiếp
 };
 
 struct List {
-    Node* head;  // trỏ đầu danh sách
+    Node* head;  // Trỏ đầu danh sách
 };
 
-//tạo danh sách rỗng
+// Tạo danh sách rỗng
 void khoiTao(List &l) {
     l.head = NULL;
 }
 
-//so sánh hai chuỗi
+// So sánh hai chuỗi
 int soSanhChuoi(const char* s1, const char* s2) {
     int i = 0;
-    // So sánh từng ký tự
     while (s1[i] != '\0' && s2[i] != '\0') {
         if (s1[i] != s2[i]) {
-            return s1[i] - s2[i];  // return về hiệu nếu khác
+            return s1[i] - s2[i];  // Return về hiệu nếu khác
         }
         i++;
     }
-    return s1[i] - s2[i];  // So sánh độ dài
+    return s1[i] - s2[i];
 }
 
 // Tạo node mới
@@ -53,7 +52,7 @@ Node* taoNode(SinhVien sv) {
     return p;
 }
 
-// Thêm sv vào danh sách (tăng dần)
+// Thêm sinh viên vào danh sách theo thứ tự mã sinh viên (tăng dần)
 void themSinhVien(List &l, SinhVien sv) {
     Node* p = taoNode(sv);
 
@@ -70,13 +69,13 @@ void themSinhVien(List &l, SinhVien sv) {
     }
 }
 
-// Nhập tt
+// Nhập thông tin sinh viên
 SinhVien nhapSinhVien() {
     SinhVien sv;
     cout << "Nhap ma sinh vien: ";
     cin >> sv.maSV;
     cout << "Nhap ho ten: ";
-    cin.ignore();  // Xóa bộ đệm 
+    cin.ignore();  
     cin.getline(sv.hoTen, 50);
     cout << "Nhap gioi tinh (0: Nu, 1: Nam): ";
     cin >> sv.gioiTinh;
@@ -92,7 +91,7 @@ SinhVien nhapSinhVien() {
     return sv;
 }
 
-// In tt
+// In danh sách sinh viên
 void inDanhSach(List l) {
     Node* p = l.head;
     while (p != NULL) {
@@ -109,9 +108,82 @@ void inDanhSach(List l) {
     }
 }
 
+// kiểm tra và in các sinh viên có cùng ngày sinh
+void inSinhVienCungNgaySinh(List l) {
+    bool found = false;
+    Node* p = l.head;
+
+    while (p != NULL) {
+        bool coSinhVienTrung = false;
+        Node* q = p->next;
+
+        while (q != NULL) {
+            if (p->data.ngaySinh.ngay == q->data.ngaySinh.ngay &&
+                p->data.ngaySinh.thang == q->data.ngaySinh.thang &&
+                p->data.ngaySinh.nam == q->data.ngaySinh.nam) {
+                
+                if (!coSinhVienTrung) {
+                    cout << "Sinh vien co ngay sinh " << p->data.ngaySinh.ngay << "/"
+                         << p->data.ngaySinh.thang << "/" << p->data.ngaySinh.nam << ":\n";
+                    cout << "Ma SV: " << p->data.maSV << ", Ho ten: " << p->data.hoTen << endl;
+                    coSinhVienTrung = true;
+                    found = true;
+                }
+                cout << "Ma SV: " << q->data.maSV << ", Ho ten: " << q->data.hoTen << endl;
+            }
+            q = q->next;
+        }
+        
+        if (coSinhVienTrung) {
+            cout << "------------------------------" << endl;
+        }
+        p = p->next;
+    }
+
+    if (!found) {
+        cout << "Khong tim thay sinh vien cung ngay sinh.\n";
+    }
+}
+
+// xóa sinh viên có cùng ngày sinh
+void xoaSinhVienCungNgaySinh(List &l) {
+    Node* p = l.head;
+    Node* truoc = NULL;
+
+    while (p != NULL) {
+        Node* q = p->next;
+        bool coSinhVienTrung = false;
+
+        while (q != NULL) {
+            if (p->data.ngaySinh.ngay == q->data.ngaySinh.ngay &&
+                p->data.ngaySinh.thang == q->data.ngaySinh.thang &&
+                p->data.ngaySinh.nam == q->data.ngaySinh.nam) {
+                
+                coSinhVienTrung = true;
+                break;
+            }
+            q = q->next;
+        }
+
+        if (coSinhVienTrung) {
+            if (truoc == NULL) {
+                l.head = p->next;
+            } else {
+                truoc->next = p->next;
+            }
+            delete p;
+            if (truoc == NULL) p = l.head;
+            else p = truoc->next;
+        } else {
+            truoc = p;
+            p = p->next;
+        }
+    }
+}
+
 int main() {
     List l;
-    khoiTao(l);  //tạo danh sách
+    khoiTao(l);
 
     int n;
     cout << "Nhap so luong sinh vien: ";
@@ -126,6 +198,12 @@ int main() {
     cout << "\nDanh sach sinh vien:\n";
     inDanhSach(l);
 
+    cout << "\nCac sinh vien co cung ngay sinh:\n";
+    inSinhVienCungNgaySinh(l);
+
+    xoaSinhVienCungNgaySinh(l);
+    cout << "\nDanh sach sinh vien sau khi loai bo sinh vien co ngay sinh trung lap:\n";
+    inDanhSach(l);
+
     return 0;
 }
-
